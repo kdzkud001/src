@@ -34,35 +34,67 @@ public class Clubgoer extends Thread {
 		wantToLeave=false;	 //want to stay when arrive
 		rand=new Random();
 	}
+
+	private static CountDownLatch startLatch = new CountDownLatch(1);
+
+	static AtomicBoolean Paused = new AtomicBoolean(false);
+
+	public static boolean getPaused() {
+        return Paused.get();
+    }
+
+    synchronized public static void setPaused(boolean newBool) {
+        Paused.set(newBool);
+    }
+
 	
 	//getter
-	public  boolean inRoom() {
+	synchronized public  boolean inRoom() {
 		return inRoom;
 	}
 	
 	//getter
-	public   int getX() { return currentBlock.getX();}	
+	synchronized public   int getX() { return currentBlock.getX();}	
 	
 	//getter
-	public   int getY() {	return currentBlock.getY();	}
+	synchronized public   int getY() {	return currentBlock.getY();	}
 	
 	//getter
-	public   int getSpeed() { return movingSpeed; }
+	synchronized public   int getSpeed() { return movingSpeed; }
 
 	//setter
 
 	//check to see if user pressed pause button
 	private void checkPause() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
-        
+        synchronized (club) {
+            while (getPaused()) {
+                try {
+                    club.wait();
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+            club.notifyAll(); // Notify after exiting the pause loop
+        }
     }
-	private void startSim() {
-		// THIS DOES NOTHING - MUST BE FIXED  	
-        
+
+	//start the simulation
+private void startSim() {
+    try {
+        startLatch.await(); // Wait for the latch to count down to zero
+    } catch (InterruptedException e) {
+        System.out.println(e);
     }
+}
+
+public static void startSimulation() {
+    startLatch.countDown(); // Decrease the latch count by 1 to release waiting threads
+}
+
+
 	
 	//get drink at bar
-		private void getDrink() throws InterruptedException {
+		synchronized private void getDrink() throws InterruptedException {
 			//FIX SO BARMAN GIVES THE DRINK AND IT IS NOT AUTOMATIC
 			thirsty=false;
 			System.out.println("Thread "+this.ID + " got drink at bar position: " + currentBlock.getX()  + " " +currentBlock.getY() );

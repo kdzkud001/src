@@ -68,18 +68,27 @@ public class ClubSimulation {
 		// add the listener to the jbutton to handle the "pressed" event
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
-			    	  	// THIS DOES NOTHING - MUST BE FIXED  	  
+
+				synchronized(Clubgoer.club){
+					Clubgoer.startSimulation();
+					Clubgoer.club.notify();
+				  }	  
 		    }
 		   });
 			
-			final JButton pauseB = new JButton("Pause ");;
+		   final JButton pauseB = new JButton("Pause ");;
 			
-			// add the listener to the jbutton to handle the "pressed" event
-			pauseB.addActionListener(new ActionListener() {
-		      public void actionPerformed(ActionEvent e) {
-		    		// THIS DOES NOTHING - MUST BE FIXED  	
-		      }
-		    });
+		   // add the listener to the jbutton to handle the "pressed" event
+		   pauseB.addActionListener(new ActionListener() {
+			 public void actionPerformed(ActionEvent e) {
+					
+				   synchronized(Clubgoer.club){
+				   Clubgoer.setPaused(!(Clubgoer.getPaused()));
+				   Clubgoer.club.notify();
+				   }
+			 }
+		   });
+		   
 			
 		JButton endB = new JButton("Quit");
 				// add the listener to the jbutton to handle the "pressed" event
