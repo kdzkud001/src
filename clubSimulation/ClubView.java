@@ -31,7 +31,7 @@ public class ClubView extends JPanel implements Runnable {
 		}
 		
 		public void paintComponent(Graphics g) {
-			
+			synchronized (this) {
 		    int width = getWidth();
 		    int height = getHeight();
 		    wIncr= width/(maxX+2); //1 space on either side
@@ -93,11 +93,14 @@ public class ClubView extends JPanel implements Runnable {
 		    			//if( customerLocations[i].getArrived()) System.out.println("customer " + i+" waiting outside"); //debug
 		    		}
 		    }
+		}
 		   }
 	
 		public void run() {
 			while (true) {
-				repaint();
+				synchronized (this) {
+					repaint();
+				}
 			}
 		}
 

@@ -29,8 +29,8 @@ public class ClubGrid {
 		counter=c;
 		}
 	
-	//initialise the grsi, creating all the GridBlocks
-	private  void initGrid(int []exitBlocks) throws InterruptedException {
+	//initialise the grid, creating all the GridBlocks
+	synchronized private  void initGrid(int []exitBlocks) throws InterruptedException {
 		for (int i=0;i<x;i++) {
 			for (int j=0;j<y;j++) {
 				boolean exit_block=false;
@@ -70,17 +70,25 @@ public class ClubGrid {
 		return true;
 	}
 	
-	public GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException  {
-		counter.personArrived(); //add to counter of people waiting 
-		entrance.get(myLocation.getID());
-		counter.personEntered(); //add to counter
-		myLocation.setLocation(entrance);
-		myLocation.setInRoom(true);
-		return entrance;
+	GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException {
+		synchronized (counter) {
+			while (counter.overCapacity()) {
+				System.out.println("NEW THREAD FULL JOINED");
+				counter.personArrived(); // Add to counter of people waiting
+				counter.wait(); // Wait for the signal to proceed
+			}
+			counter.personArrived();
+			entrance.get(myLocation.getID());
+			counter.personEntered(); // Add to counter
+			myLocation.setLocation(entrance);
+			myLocation.setInRoom(true);
+			return entrance;
+		}
 	}
 	
 	
-	public GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in 
+	
+	synchronized public GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in 
 		
 		int c_x= currentBlock.getX();
 		int c_y= currentBlock.getY();
@@ -107,14 +115,16 @@ public class ClubGrid {
 	} 
 	
 
-	public  void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+	public void leaveClub(GridBlock currentBlock,PeopleLocation myLocation)   {
+		synchronized (counter) {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);
 			entrance.notifyAll();
 	}
+}
 
-	public GridBlock getExit() {
+	synchronized public GridBlock getExit() {
 		return exit;
 	}
 
@@ -126,7 +136,7 @@ public class ClubGrid {
 		return null;
 	}
 	
-	public void setExit(GridBlock exit) {
+	synchronized public void setExit(GridBlock exit) {
 		this.exit = exit;
 	}
 

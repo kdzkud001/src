@@ -28,23 +28,23 @@ public class GridBlock {
 	
 	public  int getY() {return coords[1];}
 	
-	public  boolean get(int threadID) throws InterruptedException {
+	synchronized public  boolean get(int threadID) throws InterruptedException {
 		if (isOccupied==threadID) return true; //thread Already in this block
 		if (isOccupied>=0) return false; //space is occupied
 		isOccupied=threadID;  //set ID to thread that had block
 		return true;
 	}
 		
-	public void release() {
+	synchronized public void release() {
 		isOccupied=-1;
 	}
 	
-	public  boolean occupied() {
+	synchronized public  boolean occupied() {
 		if(isOccupied==-1) return false;
 		return true;
 	}
 	
-	public boolean isExit() {
+	synchronized public boolean isExit() {
 		return isExit;	
 	}
 
