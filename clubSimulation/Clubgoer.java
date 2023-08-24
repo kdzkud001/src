@@ -49,18 +49,18 @@ public class Clubgoer extends Thread {
 
 	
 	//getter
-	synchronized public  boolean inRoom() {
+	public  boolean inRoom() {
 		return inRoom;
 	}
 	
 	//getter
-	synchronized public   int getX() { return currentBlock.getX();}	
+	public   int getX() { return currentBlock.getX();}	
 	
 	//getter
-	synchronized public   int getY() {	return currentBlock.getY();	}
+	public   int getY() {	return currentBlock.getY();	}
 	
 	//getter
-	synchronized public   int getSpeed() { return movingSpeed; }
+	public   int getSpeed() { return movingSpeed; }
 
 	//setter
 
@@ -80,11 +80,13 @@ public class Clubgoer extends Thread {
 
 	//start the simulation
 private void startSim() {
+	synchronized (this) {
     try {
         startLatch.await(); // Wait for the latch to count down to zero
     } catch (InterruptedException e) {
         System.out.println(e);
     }
+}
 }
 
 public static void startSimulation() {

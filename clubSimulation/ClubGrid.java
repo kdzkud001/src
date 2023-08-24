@@ -72,10 +72,16 @@ public class ClubGrid {
 	
 	GridBlock enterClub(PeopleLocation myLocation) throws InterruptedException {
 		synchronized (counter) {
+			counter.personArrived(); // Add to counter of people waiting
 			while (counter.overCapacity()) {
-				System.out.println("NEW THREAD FULL JOINED");
-				counter.personArrived(); // Add to counter of people waiting
+				System.out.println("Thread " + myLocation.getID() + " waiting to enter club");
 				counter.wait(); // Wait for the signal to proceed
+
+				synchronized (entrance) {
+					while (entrance.occupied()) {
+						entrance.wait();
+					}
+				}
 			}
 			counter.personArrived();
 			entrance.get(myLocation.getID());
@@ -90,6 +96,12 @@ public class ClubGrid {
 	
 	synchronized public GridBlock move(GridBlock currentBlock,int step_x, int step_y,PeopleLocation myLocation) throws InterruptedException {  //try to move in 
 		
+		synchronized (entrance) {
+			if (!entrance.occupied()) {
+				entrance.notifyAll();
+			}
+		
+
 		int c_x= currentBlock.getX();
 		int c_y= currentBlock.getY();
 		
@@ -112,6 +124,7 @@ public class ClubGrid {
 		currentBlock.release(); //must release current block
 		myLocation.setLocation(newBlock);
 		return newBlock;
+		}
 	} 
 	
 
@@ -120,7 +133,7 @@ public class ClubGrid {
 			currentBlock.release();
 			counter.personLeft(); //add to counter
 			myLocation.setInRoom(false);
-			entrance.notifyAll();
+			counter.notifyAll();
 	}
 }
 
