@@ -100,7 +100,7 @@ public class ClubGrid {
 			if (!entrance.occupied()) {
 				entrance.notifyAll();
 			}
-		
+		}
 
 		int c_x= currentBlock.getX();
 		int c_y= currentBlock.getY();
@@ -124,7 +124,6 @@ public class ClubGrid {
 		currentBlock.release(); //must release current block
 		myLocation.setLocation(newBlock);
 		return newBlock;
-		}
 	} 
 	
 
